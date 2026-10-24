@@ -1,0 +1,36 @@
+
+name: Actualites officielles DOFUS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  recuperer-actualites:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Recuperer les actualites DOFUS
+        run: python fetch_dofus.py
+
+      - name: Enregistrer le fichier JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dofus-news.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Mise a jour des actualites DOFUS"
+            git push
+          fi
